@@ -1,12 +1,13 @@
 # ExportXiamiList
 导出虾米歌单方便导入到网易云音乐
 
-- 依赖
-beautifulsoup4
-
 - EXE 下载
 
-http://pan.baidu.com/s/1i3pELUH （提取码：pvai）
+  http://pan.baidu.com/s/1i3pELUH （提取码：pvai）
+
+- 依赖
+  
+  beautifulsoup4
 
 - 使用方法
     1. 进入虾米网首页，点击顶栏导航上的「我的音乐」；
