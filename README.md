@@ -5,7 +5,7 @@
 
   http://pan.baidu.com/s/1i3pELUH （提取码：pvai）
 
-- 依赖
+- py 依赖
   
   beautifulsoup4
 
