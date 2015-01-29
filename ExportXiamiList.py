@@ -12,6 +12,7 @@ from tkinter import *
 
 def print_log(where,content):
 	where.insert(END,content)
+	where.see(END)
 
 def open_link(link):
 	request = urllib.request.Request(link)
@@ -24,10 +25,7 @@ def open_link(link):
 			errorCode = str(err) + "\n链接错误，请重新校对链接"
 		else:
 			errorCode = str(err) + "\n虾米歌单网页打开失败，请重新校对链接或稍后再试"
-		print_log(log,errorCode)
-		#print (errorCode)
-		
-
+		print_log(log,errorCode)		
 
 def get_page_song(soup,pageSongList):
 	list = soup.find(attrs={"class": "track_list"}).find_all('td',class_="song_name")
@@ -49,12 +47,18 @@ def get_page_song(soup,pageSongList):
 			artistName = joinname.join(artistNameList)
 		else:
 			artistName = artistNameList[0]
-		songLog = songName + " - " + artistName+'\n'
-		#print_log(log,songLog)
+
+		global songSum
+		global num
+		num = num + 1
+		numLog = '('+ str(num) +'/'+ songSum +')'
+		songLog = '正在导出'+ numLog +':'+ songName + " - " + artistName+'\n'
+		print_log(log,songLog)
+		
 		#print (songLog)
 		pageSongList.append(artistName + " - " + songName)
 
-def onclick():
+def xiamilist():
 	userEntryURL = userEntryLink.get()
 	try:
 		userURL = re.search(r'(?P<link>http:\/\/www.xiami.com\/space\/lib-song\/u\/\d+)\D*',userEntryURL)
@@ -65,6 +69,14 @@ def onclick():
 		
 	songList = []
 	websoup = BeautifulSoup(open_link(userURL))
+	songSumSoup = websoup.find(attrs={'class':'all_page'})
+
+	global songSum
+	songSum = re.search(r'共(?P<sum>\d+)条',str(songSumSoup))
+	songSum = songSum.group('sum')
+	global num
+	num = 0
+
 	get_page_song(websoup,songList)
 
 	# get other page song
@@ -76,7 +88,6 @@ def onclick():
 			XiamiPageURL = userURL + "/page/" + str(i)
 			pagesoup = BeautifulSoup(open_link(XiamiPageURL))
 			get_page_song(pagesoup,songList)
-
 
 	#---------------------------
 	# create songlist.xml
@@ -103,9 +114,16 @@ def onclick():
 	f = open("xiami.kgl",mode='w',encoding='utf-8')
 	doc.writexml(f)
 	f.close()
-	log.insert(END,'*******\n已完成！\n可以将该程序所在文件夹下的xiami.kgl导入到网易云音乐了。')
+	completeNotice = '*******已完成！*******\n可以将该程序所在文件夹下的xiami.kgl导入到网易云音乐了！'
+	print_log(log,completeNotice)
 
-	
+import threading
+
+def onclick():
+	exportThread = threading.Thread(target=xiamilist)
+	exportThread.start()
+
+
 root = Tk()
 root.title('导出虾米歌单')
 root.config(height=480)
@@ -115,7 +133,7 @@ title.pack()
 
 userEntry = Label(root,width=350)
 userEntry.pack(pady=8)
-userEntryTitle = Label(userEntry,wraplength=350,text='请输入歌单链接',font='微软雅黑 -14 ',)
+userEntryTitle = Label(userEntry,text='请输入歌单链接')
 userEntryTitle.pack(side=LEFT)
 userEntryLink = Entry(userEntry,width=50)
 userEntryLink.pack(side=LEFT)
@@ -126,14 +144,14 @@ entryExplain.pack()
 export = Button(root,width=20,text='导出',command=onclick)
 export.pack(pady=8)
 
-log = Text(root,font='consolas -15')
-log.config(width=60,height=8)
+log = Text(root)
+log.config(width=70,height=12)
 log.pack(side=LEFT,fill='both')
 
 scrollbar = Scrollbar(root)
 scrollbar.pack(side=RIGHT,fill=Y)
 scrollbar.config(command = log.yview())
 log.config(yscrollcommand=scrollbar.set)
-log.see(END)
+
 
 root.mainloop()
