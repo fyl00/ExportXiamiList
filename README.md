@@ -1,9 +1,9 @@
 # ExportXiamiList
-使用 Python3.4 写的小脚本，导出虾米歌单以便导入到网易云音乐，为了方便其他人使用，用 tkinter 写了个 GUI ，打包成了 EXE 程序。
+使用 Python3.4 写的小脚本，导出虾米歌单或者精选集以便导入到网易云音乐，为了方便其他人使用，用 tkinter 写了个 GUI ，打包成了 EXE 程序。
 
 - EXE 下载
 
-  链接: http://pan.baidu.com/s/1dDpgUnZ 密码: qi6e
+  链接: http://pan.baidu.com/s/1kT9n7sb 密码: 8rvl
 
 - py 依赖
   
