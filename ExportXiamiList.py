@@ -1,14 +1,11 @@
-# -*- coding: utf-8 -*-
-#---------------------------------------  
-#   Name：ExportXiamiList
-#   VER：0.1  
-#   Author：FryeLee  
-#---------------------------------------
-import urllib.request
+
 from bs4 import BeautifulSoup
+from tkinter import *
+import math
 import re
 import os
-from tkinter import *
+import urllib.request
+
 
 def print_log(where,content):
 	where.insert(END,content)
@@ -54,8 +51,6 @@ def get_page_song(soup,pageSongList):
 		numLog = '('+ str(num) +'/'+ songSum +')'
 		songLog = '正在导出'+ numLog +':'+ songName + " - " + artistName+'\n'
 		print_log(log,songLog)
-		
-		#print (songLog)
 		pageSongList.append(artistName + " - " + songName)
 
 def xiamilist():
@@ -69,6 +64,7 @@ def xiamilist():
 		
 	songList = []
 	websoup = BeautifulSoup(open_link(userURL))
+
 	songSumSoup = websoup.find(attrs={'class':'all_page'})
 
 	global songSum
@@ -78,11 +74,8 @@ def xiamilist():
 	num = 0
 
 	get_page_song(websoup,songList)
-
 	# get other page song
-
-	pageInfo = websoup.find_all('a',class_="p_num") 
-	pageNum = len(pageInfo)
+	pageNum = math.ceil(int(songSum)/25)
 	if pageNum > 1 :
 		for i in range(2,pageNum+1):
 			XiamiPageURL = userURL + "/page/" + str(i)
@@ -92,11 +85,13 @@ def xiamilist():
 	#---------------------------
 	# create songlist.xml
 	#---------------------------
+	filenamesoup = websoup.find('head').find('title')
+	filename = str(filenamesoup.text) + '.kgl'
 
 	from xml.dom import minidom
 	doc = minidom.Document()
 	doclsit = doc.createElement("List")
-	doclsit.setAttribute('ListName','虾米红心')
+	doclsit.setAttribute('ListName',filename)
 	doc.appendChild(doclsit)
 
 
@@ -111,10 +106,12 @@ def xiamilist():
 	for song in songList:
 		xml_add_song(song)
 
-	f = open("xiami.kgl",mode='w',encoding='utf-8')
+
+
+	f = open(filename,mode='w',encoding='utf-8')
 	doc.writexml(f)
 	f.close()
-	completeNotice = '*******已完成！*******\n可以将该程序所在文件夹下的xiami.kgl导入到网易云音乐了！'
+	completeNotice = '*******已完成！*******\n可以将该程序所在文件夹下的'+ filename +'导入到网易云音乐了！'
 	print_log(log,completeNotice)
 
 import threading
@@ -138,14 +135,17 @@ userEntryTitle.pack(side=LEFT)
 userEntryLink = Entry(userEntry,width=50)
 userEntryLink.pack(side=LEFT)
 
-entryExplain = Label(root,wraplength=400,fg='grey',justify='left',text='获取虾米歌单链接方法：登录虾米网页点击顶栏中的「我的音乐」，然后点击「音乐库」下面的「收藏的歌曲」所获得的链接即歌单链接（一定要点击不然链接不对）。\n（正确链接参考 http://www.xiami.com/lib-song/u/123456?spm=xxx）')
-entryExplain.pack()
+# entryExplain = Label(root,wraplength=400,fg='grey',justify='left',text='获取虾米歌单链接方法：登录虾米网页点击顶栏中的「我的音乐」，然后点击「音乐库」下面的「收藏的歌曲」所获得的链接即歌单链接（一定要点击不然链接不对）。\n（正确链接参考 http://www.xiami.com/lib-song/u/123456?spm=xxx）')
+# entryExplain.pack()
 
 export = Button(root,width=20,text='导出',command=onclick)
 export.pack(pady=8)
 
+readme = '获取虾米歌单链接方法：\n登录虾米网页点击顶栏中的「我的音乐」，然后点击「音乐库」下面的「收藏的歌曲」所获得的链接即歌单链接（一定要点击不然链接不对）。'
+
 log = Text(root)
 log.config(width=70,height=12)
+log.insert(END,readme)
 log.pack(side=LEFT,fill='both')
 
 scrollbar = Scrollbar(root)
