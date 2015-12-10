@@ -20,7 +20,7 @@ def print_log(where,content):
 def isRealArtist(name):
     name = name.get('title')
     conditionA = (name != '高清MV')
-    conditionB = (name != '虾米音乐人')
+    conditionB = (name != '音乐人')
     return (conditionA and conditionB)
 
 class XiamiRequest(object):
