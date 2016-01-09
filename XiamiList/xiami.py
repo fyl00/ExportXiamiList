@@ -27,8 +27,7 @@ class XiamiRequest(object):
 		while True:
 			try:
 				data = self.session.get(*args, **kwargs)
-				# for index, cookie in enumerate(self.session.cookies):
-				# 	print ('[',index, ']',cookie)
+
 				if data.status_code == 403:
 					sec = re.findall('<script>document.cookie="sec=(.*?);', data.text)
 					if len(sec) != 0:
@@ -151,15 +150,18 @@ class XiamiLogin(XiamiRequest):
 
 
 class XiamiHandle(XiamiRequest):
-	def __init__(self,soup=None,link=None,pagecount=None,pagination=None):
+	def __init__(self,soup=None,link=None,pagecount=None):
 		super(XiamiHandle,self).__init__()
 		self.songlist = []
 		self.soup = soup
 		self.pagecount = pagecount
-		self.pagination = pagination
+		self.pagination = 0
+		self.isPageExistedSong = True
+
 	def get_u_song(self):
 		songListSoup = self.soup.find('table',class_="track_list").find_all('tr')
 		if songListSoup:
+			print("Page: %s" %self.pagination)
 			for song in songListSoup:
 				#check the song's checkbox
 				# if 'checked="checked"' in str(song.find('td',class_="chkbox")):
@@ -174,14 +176,12 @@ class XiamiHandle(XiamiRequest):
 							artistName = artistNameTemp
 						except NameError:
 							artistName = artistName + '、' + artistNameTemp
-				# songLog = '正在导出第(%s/%s)页:%s - %s\n' %(self.pagination,self.pagecount,songName.encode('utf-8'),artistName.encode('utf-8'))
-				# TheData['log'] = songLog
-				# print TheData['log']
 				self.songlist.append(artistName + " - " + songName)
 
 			return True
 
 		else:
+			print("There's no data from page %s." %self.pagination)
 			return False
 
 	def get_collect_song(self):
@@ -201,10 +201,7 @@ class XiamiHandle(XiamiRequest):
 				    for i in range(2,len(songInfo)):
 				        anotherartistName = songInfo[i].get_text()
 				        artistName = artistName + u'、' +anotherartistName
-				# numLog = '('+ str(num) +'/'+ str(songSum) +')'
-				# songLog = u'正在导出'+ numLog +':'+ songName + " - " + artistName+'\n'
-				# TheData['log'] = songLog
-				# print TheData['log']
+
 				self.songlist.append(artistName + " - " + songName)
 
 	def link_category(self,link):
@@ -236,44 +233,30 @@ class XiamiHandle(XiamiRequest):
 		userURL = URLInfo[1]
 		songList = []
 		self.soup = BeautifulSoup(self._safe_get(userURL,headers={'User-agent': 'Mozilla/5.0'}).content)
-        
+
 		if URLInfo[0] == 'u':
 			xmllistname = u'虾米红心'
 			xmlFileName = 'Xiami.kgl'
+
 			songSumSoup = self.soup.find(attrs={'class':'all_page'})
 			songSum = re.search(r'共(?P<sum>\d+)条',str(songSumSoup))
 			songSum = songSum.group('sum')
 
-			# if int(songSum) > 500 :
-			# 	print_log(log,"由于需要，正在登录虾米，请等待……")
-			# 	XiamiLogin().login_xiami('PleaseEnterUsername','PleaseEnterPassword')
+			while self.isPageExistedSong:
+				self.pagination += 1
+				XiamiPageURL = userURL + "/page/" + str(self.pagination)
+				try:
+					resp = self._safe_get(XiamiPageURL,
+						headers={'User-agent': 'Mozilla/5.0'})
+					self.soup = BeautifulSoup(resp.text)
+					self.isPageExistedSong = self.get_u_song()
+				except Exception as err:
+					notice = u"抓取到" + str(i) + u"页时发生错误("+ str(err) +u")，请重新校对链接或稍后再试。"
+					TheData['log'] = notice
+					TheData['xmlContent'] = self.create_songlist_xml(xmllistname)
+					return TheData
+				pass
 
-			self.pagecount = int(math.ceil(int(songSum)/25))
-			self.pagination = 1
-			self.get_u_song()
-			# get other page song
-
-			if self.pagecount > 1 :
-				for i in range(2,self.pagecount+1):
-					self.pagination = i
-					XiamiPageURL = userURL + "/page/" + str(i)
-					try:
-						resp = self._safe_get(XiamiPageURL,
-							headers={'User-agent': 'Mozilla/5.0'})
-						self.soup = BeautifulSoup(resp.text)
-
-						isContinue = self.get_u_song()
-						if not isContinue:
-							pageLog = u"已为您抓取 %s 页歌曲，由于虾米网页 Bug ，此页之后网页上已经没有歌曲了。" %str(i)
-							TheData['log'] = pageLog
-							TheData['xmlContent'] = self.create_songlist_xml(xmllistname)
-							return TheData
-
-					except Exception as err:
-						notice = u"抓取到" + str(i) + u"页时发生错误("+ str(err) +u")，请重新校对链接或稍后再试。"
-						TheData['log'] = notice
-						TheData['xmlContent'] = self.create_songlist_xml(xmllistname)
-						return TheData
 
 		elif URLInfo[0] == 'collect':
 			filenametemp = re.search(r'\D+\/(?P<filename>\d+)',URLInfo[1])
