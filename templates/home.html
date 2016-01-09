@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang ="zh-CN">
+<head>
+    <title>导出虾米歌单</title>
+    <meta charset = "utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <style type="text/css">html,body{height: 100%;width: 100%;margin: 0;padding: 0;font-family: "Open Sans",Helvetica, Tahoma, Arial, STXihei, “华文细黑”, Heiti, “黑体”, “Microsoft YaHei”, “微软雅黑”, SimSun, “宋体”, sans-serif;}.content {width:760px;margin:auto;padding-top: 100px }.appname{margin-bottom: 15px;text-align: center;}.appname h1{margin-bottom:5px;text-align: center;letter-spacing: 5px;color: #ef6a03}.appname a{color: #888;}.appname a:hover{color: }.content form{width: 700px;margin: auto}#XiamiListLink{width: 590px;height: 30px;padding:0 5px;border: 1px solid #d8d8d8;font-size: 15px;font-style: italic;color:#666;}#XiamiListLink:hover{border:1px solid #999;}#XiamiListLink:focus{border:1px solid #F06818;outline: none }#link{}#button{left: 593px;}#Submit{width: 103px;height: 32px;position:absolute;border:1px solid #F06818;background: #f57614;color: white;font-size: 15px;}#Submit:hover{border:1px solid #cc5a18}#Submit:focus{background: #cc5a18;outline: none}#readme{margin: 50px auto;width: 600px;color: #444;font-size:15px;line-height:150%}
+    </style>
+
+</head>
+<body>
+<div class="content">
+    <div class="appname">
+        <h1>导出虾米歌单</h1>
+		<a href="https://github.com/fyl00/ExportXiamiList">源码</a>
+		<span> | </span>
+        <a href="http://www.weibo.com/fyl00">@fyl00</a>
+    </div>
+    <form name="input"  action="/xml" method="get">
+    <span id="link"><input type="text" id="XiamiListLink"name="XiamiListLink" onfocus="if(this.value=='请输入虾米收藏歌曲列表链接或者精选集链接'){this.value=''}" onblur="if(this.value==''){this.value='请输入虾米收藏歌曲列表链接或者精选集链接'}" value='请输入虾米收藏歌曲列表链接或者精选集链接' /></span>
+    <span id="button"><button type="button" id="Submit" onclick=" get_list()" >开始导出</button></span>
+    </form>
+    <div id="readme">
+
+        <p>获得你收藏歌曲列表链接的办法：</br>点击虾米首页顶栏导航上的「我的音乐」，再点击点击「音乐库」下面的 Tab 「收藏的歌曲」得到的链接即为你收藏歌曲列表的链接</p>
+    </div>
+</div>
+</body>
+<link href='http://fonts.useso.com/css?family=Open+Sans:700,400' rel='stylesheet'>
+<script type="text/javascript" src="http://lib.sinaapp.com/js/jquery/2.0.3/jquery-2.0.3.min.js"></script>
+<script type="text/javascript">
+    function check_link(){
+        var notice = "链接错误，请重新校对链接\n收藏歌曲列表链接为:\n http://www.xiami.com/space/lib-song/u/1234?xxxx \n精选集链接为:\n http://www.xiami.com/collect/123?xxx \n 获得你收藏歌曲列表链接的办法：\n点击虾米首页顶栏导航上的「我的音乐」，再点击点击「音乐库」下面的 Tab 「收藏的歌曲」得到的链接即为你收藏歌曲列表的链接。"
+        var userlink = $('#XiamiListLink').val();
+        var checkSongList = new RegExp('^http://www.xiami.com/space/lib-song/u/');
+        var checkCollectList = new RegExp('^http://www.xiami.com/collect/');
+        console.log(userlink.match(checkSongList))
+        check = (userlink.match(checkSongList)||userlink.match(checkCollectList))
+        if (userlink.match(checkSongList)||userlink.match(checkCollectList)){return true}
+        else {alert(notice)}
+}
+    function get_list(){
+        if (check_link()){
+            var xmlhttp=new XMLHttpRequest();
+
+            var downloadURI = function(uri,name){
+                var link = document.createElement("a");
+                link.download = name;
+                link.href = uri;
+                link.click();
+            }
+
+            xmlhttp.onreadystatechange=function(){
+                if (xmlhttp.readyState==4 && xmlhttp.status==200)
+                {
+                    $("#xmlintro").css({"display":"inherit",});
+                    $("#readme").html(xmlhttp.responseText);
+                    $("#userxml").css({
+                        "width":"550px",
+                        "height":"300px",
+                        "margin":"auto",
+                        "overflow":"auto",
+                        "border":"1px solid #aaa",
+                    });
+                    $("#Submit").html("开始导出");
+                    var xiamixml = $("xmp").html()
+                    $("#saveAsXML").click(function(){
+                        downloadURI("data:text/xml,"+xiamixml,'xiami.kgl')
+                    });
+                }else if (xmlhttp.status==500){
+                    $("#Submit").html("开始导出");
+                    $("#readme").html("服务器错误，导出失败，请稍后再试。");
+                }else{
+                    $("#Submit").html("正在导出");
+                    $("#readme").html("<div style='text-align:center'><img src={{url_for('static',filename='loading.gif')}}></div>");
+
+                }
+            }
+            link = '/xml/?XiamiListLink='+$('#XiamiListLink').val()
+            xmlhttp.open('GET',link,true);
+            xmlhttp.send();
+        }
+}
+
+    $(document).ready(function(){})
+</script>
+</html>

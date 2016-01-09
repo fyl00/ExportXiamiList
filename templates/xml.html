@@ -1,0 +1,10 @@
+{% if log%}
+<p>{{log}}<a id='saveAsXML' href='#'>点击此处</a> 将已抓取的歌单另存为 .kgl 文件后就可以导入网易云音乐了。</p>
+{% endif %}
+{% if xml %}
+<div id='userxml'>
+    <xmp>
+        {{xml|safe}}
+    </xmp>
+</div>
+{% endif %}
