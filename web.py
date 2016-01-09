@@ -8,11 +8,7 @@ from xiamilist import xiami
 
 app = Flask(__name__)
 
-import socket
-if socket.gethostname() == "SS-MBP.local":
-    app.debug = True
-else:
-    app.debug = False
+app.debug = False
 
 
 
