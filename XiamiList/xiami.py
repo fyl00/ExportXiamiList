@@ -11,15 +11,11 @@ from lxml import html,etree
 
 TheData = {}
 
-def isRealArtist(name):
-    name = name.get('title')
-    conditionA = (name != u'高清MV')
-    conditionB = (name != u'音乐人')
-    return (conditionA and conditionB)
 
 class XiamiRequest(object):
     header = {'User-Agent': 'Mozilla/5.0',
               'Referer': 'http://img.xiami.com/static/swf/seiya/player.swf?v=1394535902294'}
+
     def __init__(self):
         self.session = requests.session()
 
@@ -35,9 +31,9 @@ class XiamiRequest(object):
                         # print ('403 update sec=' + sec[0])
                         continue
             except Exception as e:
-            # 失败重试
-                outputLog = '打开链接时发生错误\n'+str(e)+"\n请等下再试……"
-                TheData['log'] = outputLog
+                # 失败重试
+                output_log = '打开链接时发生错误\n'+str(e)+"\n请等下再试……"
+                TheData['log'] = output_log
                 continue
 
             return data
@@ -54,15 +50,34 @@ class XiamiRequest(object):
                         print ('403 !' + 'update sec=', sec[0])
                         continue
             except Exception as e:
-            # 失败重试
-                outputLog = '提交数据时发生错误\n'+str(e)+"\n正在重试……"
-                TheData['log'] = outputLog
+                # 失败重试
+                output_log = '提交数据时发生错误\n'+str(e)+"\n正在重试……"
+                TheData['log'] = output_log
                 continue
 
             return data
 
+
+class XiamiLink(object):
+
+    def __init__(self, url):
+        self.url = url
+
+    @property
+    def is_collect(self):
+        user_regx = re.search(r'(?P<link>http://www.xiami.com/space/lib-song/u/\d+)\D*', self.url)
+        collect_regx = re.search(r'(?P<link>http://www.xiami.com/collect/\d+)\D*', self.url)
+        if (not user_regx) and (not collect_regx):
+            print("\n链接错误，请重新校对链接")
+        elif user_regx:
+            return False
+        elif collect_regx:
+            return True
+        return None
+
+
 class XiamiHandle(XiamiRequest):
-    def __init__(self, soup=None, link=None, pagecount=None):
+    def __init__(self, soup=None, pagecount=None):
         super(XiamiHandle, self).__init__()
         self.songs = []
         self.tree = soup
@@ -115,63 +130,46 @@ class XiamiHandle(XiamiRequest):
                         info = artist_names.join("、") + " - " + song_name
                         self.songs.append(info)
 
-    def link_category(self, link):
-        uLink = re.search(r'(?P<link>http:\/\/www.xiami.com\/space\/lib-song\/u\/\d+)\D*',link)
-        collectLink = re.search(r'(?P<link>http:\/\/www.xiami.com\/collect\/\d+)\D*',link)
-        if (not uLink) and (not collectLink):
-            TheData['log'] = '\n链接错误，请重新校对链接'
-        elif uLink:
-            url = uLink.group('link')
-            category = 'u'
-        elif collectLink:
-            url = collectLink.group('link')
-            category = 'collect'
-        return (category, url)
+    def create_songlist_xml(self, listname):
 
-    def create_songlist_xml(self,listname):
-        list = ''
+        root = etree.Element("List", ListName=listname)
         for song in self.songs:
-            songname= song+".mp3"
-            filenameNode = '<FileName>'+songname+'</FileName>\n'
-            fileNode = '<File>\n'+filenameNode+'</File>\n'
-            list += fileNode
-        list = '<?xml version="1.0" ?>\n<List ListName="'+listname+'">\n'+list+'</List>'
-        return list
+            songname = song+".mp3"
+            file_node = etree.SubElement(root, "File")
+            name_node = etree.SubElement(file_node, "FileName")
+            name_node.text = songname
+        return etree.tostring(root)
 
+    def get_list(self, url):
+        link = XiamiLink(url)
+        self.tree = html.fromstring(self._safe_get(url).text)
 
-    def get_list(self,link):
-        URLInfo = self.link_category(link)
-        userURL = URLInfo[1]
-        songList = []
-        self.tree = html.fromstring(self._safe_get(userURL).text)
-
-        if URLInfo[0] == 'u':
+        if not link.is_collect:
             xmllistname = u'虾米红心'
-            xmlFileName = 'Xiami.kgl'
 
-            song_sum = 0
-            page_sum_nodes = self.tree.xpath(".//div[@class='all_page']")
-            if page_sum_nodes:
-                song_sum_re = re.search(r'共(?P<sum>\d+)条', html.tostring(page_sum_nodes[0]))
-                if song_sum_re and song_sum_re.group("sum"):
-                    song_sum = song_sum_re.group("sum")
+            # song_sum = 0
+            # page_sum_nodes = self.tree.xpath(".//div[@class='all_page']")
+            # if page_sum_nodes:
+            #     song_sum_re = re.search(r'共(?P<sum>\d+)条', html.tostring(page_sum_nodes[0]))
+            #     if song_sum_re and song_sum_re.group("sum"):
+            #         song_sum = song_sum_re.group("sum")
 
             while self.isPageExistedSong:
                 self.pagination += 1
-                XiamiPageURL = userURL + "/page/" + str(self.pagination)
+                page_url = url + "/page/" + str(self.pagination)
                 try:
-                    resp = self._safe_get(XiamiPageURL,
-                        headers={'User-agent': 'Mozilla/5.0'})
-                    self.etree = html.fromstring(resp.text)
+                    resp = self._safe_get(page_url,
+                                          headers={'User-agent': 'Mozilla/5.0'})
+                    self.tree = html.fromstring(resp.text)
                     self.isPageExistedSong = self.get_u_song()
                 except Exception as err:
-                    notice = u"抓取到" + str(i) + u"页时发生错误("+ str(err) +u")，请重新校对链接或稍后再试。"
-                    TheData['log'] = notice
+                    print("在抓取 %s 页时发生错误\n\t%s" % (self.pagination, err))
+                    # TheData['log'] = notice
                     TheData['xmlContent'] = self.create_songlist_xml(xmllistname)
                     return TheData
                 pass
 
-        elif URLInfo[0] == 'collect':
+        else:
             name_nodes = self.etree.xpath(".//div[@class='info_collect_main'/h2]")
             xmllistname = "collect.kgl"
             if name_nodes:
@@ -186,7 +184,10 @@ class XiamiHandle(XiamiRequest):
 
 
 def xiamisonglist(link):
-    xiamiReq = XiamiRequest()
+    XiamiRequest()
     # userEntryURL = raw_input(link)
     result = XiamiHandle().get_list(link)
     return result
+
+if __name__ == "__main__":
+    XiamiHandle().create_songlist_xml()
