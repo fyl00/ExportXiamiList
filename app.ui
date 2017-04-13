@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>480</height>
+    <width>579</width>
+    <height>573</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -23,10 +23,10 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>公告页抓取工具</string>
+   <string>虾米歌单抓取工具</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QLineEdit" name="lineEdit">
+   <widget class="QLineEdit" name="linkLineEdit">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -36,11 +36,11 @@
      </rect>
     </property>
    </widget>
-   <widget class="QTextEdit" name="textEdit">
+   <widget class="QTextEdit" name="logTextEdit">
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>70</y>
+      <y>130</y>
       <width>541</width>
       <height>381</height>
      </rect>
@@ -49,8 +49,8 @@
    <widget class="QPushButton" name="pushButton">
     <property name="geometry">
      <rect>
-      <x>600</x>
-      <y>20</y>
+      <x>200</x>
+      <y>70</y>
       <width>171</width>
       <height>31</height>
      </rect>
@@ -64,7 +64,27 @@
      </font>
     </property>
     <property name="text">
-     <string>开始抓取</string>
+     <string>Start</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="sourceLabel">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>540</y>
+      <width>221</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <italic>true</italic>
+      <underline>true</underline>
+     </font>
+    </property>
+    <property name="text">
+     <string>https://github.com/fyl00/ExportXiamiList</string>
     </property>
    </widget>
   </widget>
