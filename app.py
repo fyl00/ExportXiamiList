@@ -2,11 +2,12 @@
 # author: fyl00
 # source: https://github.com/fyl00/ExportXiamiList
 
-from PyQt5.QtWidgets import QMainWindow, QApplication
+from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox
 from PyQt5.QtCore import QObject, QThread, pyqtSignal
 from PyQt5.QtGui import QTextCursor
 from ui import Ui_MainWindow
-from XiamiList.xiami import XiamiHandle
+from XiamiList.xiami import XiamiHandle, XiamiLink
+from XiamiList.tips import *
 import sys
 import logging
 
@@ -78,6 +79,32 @@ class AppWindow(QMainWindow):
         EmittingStream.stdout().textWritten.connect(self._logout)
         EmittingStream.stderr().textWritten.connect(self._logout)
 
+        self.ui.linkLineEdit.setPlaceholderText("请输入歌单链接")
+        self.ui.linkLineEdit.setFocus()
+
+        self._logout(GET_LINK)
+
+    def click_start_button(self):
+        url = self.ui.linkLineEdit.text()
+        if not self._check_url(url):
+            return
+        thread = XiamiThread(url)
+        thread.finished.connect(self._task_finished)
+        thread.start()
+        self.ui.startButton.setDisabled(True)
+
+    def _check_url(self, url):
+        link = XiamiLink(url)
+        if link.is_collect is None:
+            title = "链接格式错误"
+            QMessageBox.critical(self, title, LINK_ERROR_TIPS)
+            return False
+        return True
+
+    def _task_finished(self, value):
+        print(value)
+        self.ui.startButton.setDisabled(False)
+
     def _enbale_source_link(self):
         link_text = "源码：<a href='https://github.com/fyl00/ExportXiamiList'>GitHub</a>"
         self.ui.sourceLabel.setText(link_text)
@@ -86,17 +113,7 @@ class AppWindow(QMainWindow):
     def _logout(self, outstr):
         cursor = self.ui.logTextEdit.textCursor()
         cursor.insertText(outstr)
-
-    def click_start_button(self):
-        url = "http://www.xiami.com/collect/29594456"
-        thread = XiamiThread(url)
-        thread.finished.connect(self._task_finished)
-        thread.start()
-        self.ui.startButton.setDisabled(True)
-
-    def _task_finished(self, value):
-        print(value)
-        self.ui.startButton.setDisabled(False)
+        self.ui.logTextEdit.moveCursor(QTextCursor.End)
 
 
 if __name__ == "__main__":

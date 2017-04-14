@@ -4,7 +4,7 @@ import re
 
 from lxml import html, etree
 from .grabbot import GrabBot
-
+from .tips import LINK_ERROR_TIPS
 TheData = {}
 
 
@@ -18,7 +18,7 @@ class XiamiLink(object):
         user_regx = re.search(r"(?P<link>http://www.xiami.com/space/lib-song/u/\d+)\D*", self.url)
         collect_regx = re.search(r"(?P<link>http://www.xiami.com/collect/\d+)\D*", self.url)
         if (not user_regx) and (not collect_regx):
-            print("\n链接错误，请重新校对链接")
+            print(LINK_ERROR_TIPS)
         elif user_regx:
             self.url = user_regx.group("link")
             return False
@@ -29,9 +29,9 @@ class XiamiLink(object):
 
 
 class XiamiHandle(object):
-    def __init__(self, soup=None, pagecount=None):
+    def __init__(self, pagecount=None):
         self.songs = []
-        self.tree = soup
+        self.tree = None
         self.pagecount = pagecount
         self.pagination = 0
         self.isPageExistedSong = True
@@ -41,26 +41,27 @@ class XiamiHandle(object):
         # print(etree.tostring(song_nodes[1]))
         if len(song_nodes):
             for node in song_nodes:
+
                 name_nodes = node.xpath("td[@class='song_name']/a/@title")
                 artist_nodes = node.xpath("td[@class='song_name']/a[@class='artist_name']/@title")
                 if name_nodes and artist_nodes:
                     # and name_tmp[0] not in ["高清MV", "音乐人"]
                     song_name = name_nodes[0]
                     artist_name = "、".join(artist_nodes)
-                    self.songs.append(artist_name + " - " + song_name)
+                    info = artist_name + " - " + song_name
+                    print("-> %s" % info)
+                    self.songs.append(info)
                 else:
-                    print("get song failed. %s" % [node for node in name_nodes])
+                    print("获取歌曲失败. %s" % [node for node in name_nodes])
 
             return True
         else:
-            print("There's no data from page %s." % self.pagination)
+            print("第 %s 页没有数据." % self.pagination)
             return False
 
     def get_collect_song(self):
         song_nodes = self.tree.xpath(".//div[@class='quote_song_list']//li")
-        num = 0
         for node in song_nodes:
-            num += 1
             # check the song's checkbox
             if node.xpath("//span[@class='chk']/input[@checked]"):
                 song_info_nodes = node.xpath("div//span[@class='song_name']/a")
@@ -70,6 +71,7 @@ class XiamiHandle(object):
                                     if song_info_nodes[i].text.strip() != "MV"]
                     if len(artist_names) > 0:
                         info = "、".join(artist_names) + " - " + song_name
+                        print("-> %s" % info)
                         self.songs.append(info)
             else:
                 song_name_nodes = node.xpath("div//span[@class='song_name']")
@@ -79,6 +81,7 @@ class XiamiHandle(object):
                     if artist_nodes:
                         artist_names = [artist_node.text for artist_node in artist_nodes]
                         info = "、".join(artist_names) + " - " + song_name
+                        print("-> %s" % info)
                         self.songs.append(info)
 
     def create_songlist_xml(self, listname):
@@ -107,7 +110,7 @@ class XiamiHandle(object):
                 self.pagination += 1
                 page_url = link.url + "/page/" + str(self.pagination)
 
-                print("Page %s: %s" % (self.pagination, page_url))
+                print("第 %s 页: %s" % (self.pagination, page_url))
                 try:
                     resp = spider.get(page_url)
                     self.tree = html.fromstring(resp.text)
