@@ -3,7 +3,7 @@
 import re
 
 from lxml import html, etree
-from grabbot import GrabBot
+from .grabbot import GrabBot
 
 TheData = {}
 
@@ -100,10 +100,9 @@ class XiamiHandle(object):
         link = XiamiLink(url)
         response = spider.get(url)
         self.tree = html.fromstring(response.text)
-
+        print("抓取歌单：%s" % url)
         if not link.is_collect:
             xmllistname = u'虾米红心'
-
             while self.isPageExistedSong:
                 self.pagination += 1
                 page_url = link.url + "/page/" + str(self.pagination)
