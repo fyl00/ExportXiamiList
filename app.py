@@ -3,7 +3,7 @@
 # source: https://github.com/fyl00/ExportXiamiList
 
 from PyQt5.QtWidgets import QMainWindow, QApplication
-from PyQt5.QtCore import QObject, pyqtSignal
+from PyQt5.QtCore import QObject, QThread, pyqtSignal
 from PyQt5.QtGui import QTextCursor
 from ui import Ui_MainWindow
 from XiamiList.xiami import XiamiHandle
@@ -52,6 +52,20 @@ class EmittingStream(QObject):
         return EmittingStream._stderr
 
 
+# 后台抓取，防止界面未响应
+class XiamiThread(QThread):
+
+    finished = pyqtSignal(str)
+
+    def __init__(self, url):
+        QThread.__init__(self)
+        self.url = url
+
+    def run(self):
+        XiamiHandle().get_list(self.url)
+        self.finished.emit("DONE")
+
+
 # 界面窗口
 class AppWindow(QMainWindow):
 
@@ -75,7 +89,15 @@ class AppWindow(QMainWindow):
 
     def click_start_button(self):
         url = "http://www.xiami.com/collect/29594456"
-        XiamiHandle().get_list(url)
+        thread = XiamiThread(url)
+        thread.finished.connect(self._task_finished)
+        thread.start()
+        self.ui.startButton.setDisabled(True)
+
+    def _task_finished(self, value):
+        print(value)
+        self.ui.startButton.setDisabled(False)
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
