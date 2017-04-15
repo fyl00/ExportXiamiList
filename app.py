@@ -2,13 +2,15 @@
 # author: fyl00
 # source: https://github.com/fyl00/ExportXiamiList
 
-from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox
+from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox, QFileDialog
 from PyQt5.QtCore import QObject, QThread, pyqtSignal
 from PyQt5.QtGui import QTextCursor, QIcon
+from lxml import etree
 from ui import Ui_MainWindow
 from XiamiList.xiami import XiamiHandle, XiamiLink
 from XiamiList.tips import *
 import sys
+import re
 import logging
 
 
@@ -63,8 +65,8 @@ class XiamiThread(QThread):
         self.url = url
 
     def run(self):
-        XiamiHandle().get_list(self.url)
-        self.finished.emit("DONE")
+        xmlstr = XiamiHandle().get_list(self.url)
+        self.finished.emit(xmlstr)
 
 
 # 界面窗口
@@ -102,7 +104,7 @@ class AppWindow(QMainWindow):
         return True
 
     def _task_finished(self, value):
-        print(value)
+        self._save_xml(value)
         self.ui.startButton.setDisabled(False)
 
     def _enbale_source_link(self):
@@ -114,6 +116,22 @@ class AppWindow(QMainWindow):
         cursor = self.ui.logTextEdit.textCursor()
         cursor.insertText(outstr)
         self.ui.logTextEdit.moveCursor(QTextCursor.End)
+
+    def _save_xml(self, xmlstr):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        filename, _ = QFileDialog.getSaveFileName(self, "QFileDialog.getSaveFileName()",
+                                                  "songs.kgl", "Kugou/Netease Files (*.kgl)",
+                                                  options=options)
+        r = re.search("\.kgl$", filename)
+        if not r:
+            filename = "%s.kgl" % filename
+        print(filename)
+        root = etree.fromstring(xmlstr)
+        etree.ElementTree(root).write(filename,
+                                      xml_declaration=True,
+                                      encoding="utf8",
+                                      pretty_print=True)
 
 
 if __name__ == "__main__":

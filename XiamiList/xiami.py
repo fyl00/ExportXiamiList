@@ -5,7 +5,6 @@ import re
 from lxml import html, etree
 from .grabbot import GrabBot
 from .tips import LINK_ERROR_TIPS
-TheData = {}
 
 
 class XiamiLink(object):
@@ -92,11 +91,11 @@ class XiamiHandle(object):
             file_node = etree.SubElement(root, "File")
             name_node = etree.SubElement(file_node, "FileName")
             name_node.text = songname
-        etree.ElementTree(root).write("xiami.kgl",
-                                      xml_declaration=True,
-                                      encoding="utf8",
-                                      pretty_print=True)
-        return etree.tostring(root)
+        # etree.ElementTree(root).write("xiami.kgl",
+        #                               xml_declaration=True,
+        #                               encoding="utf8",
+        #                               pretty_print=True)
+        return etree.tounicode(root)
 
     def get_list(self, url):
         spider = GrabBot()
@@ -117,9 +116,7 @@ class XiamiHandle(object):
                     self.isPageExistedSong = self.get_u_song()
                 except Exception as err:
                     print("在抓取 %s 页时发生错误:\n\t%s" % (self.pagination, err))
-                    # TheData['log'] = notice
-                    TheData['xmlContent'] = self.create_songlist_xml(xmllistname)
-                    return TheData
+                    return self.create_songlist_xml(xmllistname)
                 pass
 
         else:
@@ -130,11 +127,8 @@ class XiamiHandle(object):
 
             self.get_collect_song()
 
-        notice = u'抓取已完成！'
-        TheData['log'] = notice
-        self.create_songlist_xml(xmllistname)
-        # TheData['xmlContent'] = self.create_songlist_xml(xmllistname)
-        return TheData
+        xmlstr = self.create_songlist_xml(xmllistname)
+        return xmlstr
 
 
 def xiamisonglist(url):
