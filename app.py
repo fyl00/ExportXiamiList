@@ -4,7 +4,7 @@
 
 from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox
 from PyQt5.QtCore import QObject, QThread, pyqtSignal
-from PyQt5.QtGui import QTextCursor
+from PyQt5.QtGui import QTextCursor, QIcon
 from ui import Ui_MainWindow
 from XiamiList.xiami import XiamiHandle, XiamiLink
 from XiamiList.tips import *
@@ -119,5 +119,6 @@ class AppWindow(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = AppWindow()
+    app.setWindowIcon(QIcon(':/static/favicon.ico'))
     window.show()
     sys.exit(app.exec_())
