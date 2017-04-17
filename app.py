@@ -2,16 +2,19 @@
 # author: fyl00
 # source: https://github.com/fyl00/ExportXiamiList
 
-from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox, QFileDialog
+import logging
+import re
+import sys
+
 from PyQt5.QtCore import QObject, QThread, pyqtSignal
 from PyQt5.QtGui import QTextCursor, QIcon
+from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox, QFileDialog
 from lxml import etree
-from ui import Ui_MainWindow
-from XiamiList.xiami import XiamiHandle, XiamiLink
+
 from XiamiList.tips import *
-import sys
-import re
-import logging
+from XiamiList.xiami import XiamiHandle, XiamiLink
+from ui import Ui_MainWindow
+import images_qr
 
 
 # 打印输出到 logTextEdit
