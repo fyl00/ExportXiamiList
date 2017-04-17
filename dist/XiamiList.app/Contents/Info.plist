@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict><key>CFBundlePackageType</key>
+<string>APPL</string>
+<key>CFBundleDisplayName</key>
+<string>XiamiList</string>
+<key>CFBundleInfoDictionaryVersion</key>
+<string>6.0</string>
+<key>CFBundleShortVersionString</key>
+<string>0.0.0</string>
+<key>CFBundleIconFile</key>
+<string>favicon.ico</string>
+<key>CFBundleExecutable</key>
+<string>MacOS/xiamilist</string>
+<key>CFBundleIdentifier</key>
+<string>XiamiList</string>
+<key>CFBundleName</key>
+<string>XiamiList</string>
+<key>LSBackgroundOnly</key>
+<string>0</string>
+<key>NSHighResolutionCapable</key>
+<string>True</string>
+</dict>
+</plist>

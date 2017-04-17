@@ -1,13 +1,14 @@
 # -*- mode: python -*-
 
+
 block_cipher = None
 
 
 a = Analysis(['app.py'],
-             pathex=['E:\\Code\\Python\\ExportXiamiList'],
+             pathex=['/Users/SlowWalker/Documents/Code/Project/xiamilist/github'],
              binaries=None,
              datas=[],
-             hiddenimports=[],
+             hiddenimports=['queue'],
              hookspath=[],
              runtime_hooks=[],
              excludes=[''],
@@ -23,16 +24,16 @@ exe = EXE(pyz,
           a.binaries,
           a.zipfiles,
           a.datas,
-          name='BulletinParser',
+          name='xiamilist',
           debug=False,
           strip=False,
           upx=True,
           console=False ,
-          icon='E:\\Code\\Python\\ExportXiamiList\\static\\favicon.ico')
+          icon='/Users/SlowWalker/Documents/Code/Project/xiamilist/github/static/favicon.ico')
 
 app = BUNDLE(exe,
          name='XiamiList.app',
-         icon='E:\\Code\\Python\\ExportXiamiList\\static\\favicon.ico',
+         icon='/Users/SlowWalker/Documents/Code/Project/xiamilist/github/static/favicon.ico',
          bundle_identifier=None,
          info_plist={
             'NSHighResolutionCapable': 'True'

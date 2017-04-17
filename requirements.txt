@@ -1,4 +1,4 @@
-PyQt5
+pyqt5
 lxml
 flask == 0.7.2
 requests == 4.4.1
