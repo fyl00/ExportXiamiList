@@ -89,11 +89,16 @@ class AppWindow(QMainWindow):
 
         self._logout(GET_LINK)
 
+        # Storing a reference to the thread after it's been created
+        # http://stackoverflow.com/questions/15702782/qthread-destroyed-while-thread-is-still-running
+        self.threads = []
+
     def click_start_button(self):
         url = self.ui.linkLineEdit.text()
         if not self._check_url(url):
             return
         thread = XiamiThread(url)
+        self.threads.append(thread)
         thread.finished.connect(self._task_finished)
         thread.start()
         self.ui.startButton.setDisabled(True)
