@@ -33,7 +33,7 @@ exe = EXE(pyz,
 
 app = BUNDLE(exe,
          name='XiamiList.app',
-         icon='/Users/SlowWalker/Documents/Code/Project/xiamilist/github/static/favicon.ico',
+         icon='/Users/SlowWalker/Documents/Code/Project/xiamilist/github/static/app.icns',
          bundle_identifier=None,
          info_plist={
             'NSHighResolutionCapable': 'True'
