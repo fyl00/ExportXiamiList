@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['app.py'],
-             pathex=['E:\\Code\\Python\\ExportXiamiList'],
+             pathex=[],
              binaries=None,
              datas=[],
              hiddenimports=[],
@@ -26,4 +26,4 @@ exe = EXE(pyz,
           strip=False,
           upx=True,
           console=False ,
-          icon='E:\\Code\\Python\\ExportXiamiList\\static\\favicon.ico')
+          icon='static/favicon.ico')

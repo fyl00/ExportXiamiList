@@ -5,7 +5,7 @@ block_cipher = None
 
 
 a = Analysis(['app.py'],
-             pathex=['/Users/SlowWalker/Documents/Code/Project/xiamilist/github'],
+             pathex=[],
              binaries=None,
              datas=[],
              hiddenimports=['queue'],
@@ -29,11 +29,11 @@ exe = EXE(pyz,
           strip=False,
           upx=True,
           console=False ,
-          icon='/Users/SlowWalker/Documents/Code/Project/xiamilist/github/static/favicon.ico')
+          icon='static/favicon.ico')
 
 app = BUNDLE(exe,
          name='XiamiList.app',
-         icon='/Users/SlowWalker/Documents/Code/Project/xiamilist/github/static/app.icns',
+         icon='static/app.icns',
          bundle_identifier=None,
          info_plist={
             'NSHighResolutionCapable': 'True'
