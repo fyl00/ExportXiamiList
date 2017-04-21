@@ -18,8 +18,8 @@
   </property>
   <property name="font">
    <font>
-    <family>Agency FB</family>
-    <pointsize>9</pointsize>
+    <family>Arial</family>
+    <pointsize>10</pointsize>
    </font>
   </property>
   <property name="windowTitle">

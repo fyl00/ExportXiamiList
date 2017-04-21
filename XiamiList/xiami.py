@@ -102,7 +102,7 @@ class XiamiHandle(object):
         link = XiamiLink(url)
         response = spider.get(url)
         self.tree = html.fromstring(response.text)
-        print("抓取歌单：%s" % url)
+        print("*** START ***\n开始抓取歌单：%s" % url)
         if not link.is_collect:
             xmllistname = u'虾米红心'
             while self.isPageExistedSong:

@@ -131,15 +131,16 @@ class AppWindow(QMainWindow):
         filename, _ = QFileDialog.getSaveFileName(self, "QFileDialog.getSaveFileName()",
                                                   "songs.kgl", "Kugou/Netease Files (*.kgl)",
                                                   options=options)
-        r = re.search("\.kgl$", filename)
-        if not r:
-            filename = "%s.kgl" % filename
-        print(filename)
-        root = etree.fromstring(xmlstr)
-        etree.ElementTree(root).write(filename,
-                                      xml_declaration=True,
-                                      encoding="utf8",
-                                      pretty_print=True)
+        if filename:
+            r = re.search("\.kgl$", filename)
+            if not r:
+                filename = "%s.kgl" % filename
+            print("** 导出文件位置：%s" % filename)
+            root = etree.fromstring(xmlstr)
+            etree.ElementTree(root).write(filename,
+                                          xml_declaration=True,
+                                          encoding="utf8",
+                                          pretty_print=True)
 
 
 if __name__ == "__main__":
